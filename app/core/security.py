@@ -15,21 +15,26 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: dict, expires_delta: int = 3600) -> str:
     payload ={
         "iss": ISS,
-        "sub": data.get("sub"),
-        "aud": data.get("aud", "app"),
+        "sub": str(data.get("sub", "")),  # Ensure sub is a string
+        "aud": data.get("aud"),
         "iat": datetime.now(timezone.utc), 
         "exp":datetime.now(timezone.utc) + timedelta(minutes=expires_delta) 
         }
     
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    print(f"Created token: {token}")
     return token
     
-def verify_access_token(token: str, aud: str) -> dict:
-    """Verify the access token and return the payload."""
+def verify_access_token(token, aud: str = "tasks") -> dict:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], option = {"verifyexp": True}, audience="aud", issuer=ISS)
+        print(f"Verifying token: {token}")
+        print(f"Using audience: {aud}, issuer: {ISS}")
+        print(f"Secret key: {SECRET_KEY}")
+        print(f"Algorithm: {ALGORITHM}")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], audience=aud, issuer=ISS ) #options = {"verify_exp": True}, audience=aud, issuer=ISS
         if payload.get("exp") < datetime.now(timezone.utc).timestamp():
             raise jwt.JWTError("Token has expired")
         return payload.get("sub", None)
-    except jwt.JWTError:
+    except jwt.JWTError as e:
+        print(f"Token verification error: {e}")
         return None
