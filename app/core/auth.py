@@ -31,5 +31,4 @@ async def get_current_user(aud: str, token: str = Depends(oauth2_scheme), sessio
             return None
         return user
     except Exception as e:
-        print(f"Error verifying token: {e}")
         return None

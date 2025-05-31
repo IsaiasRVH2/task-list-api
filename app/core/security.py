@@ -22,19 +22,13 @@ def create_access_token(data: dict, expires_delta: int = 3600) -> str:
         }
     
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-    print(f"Created token: {token}")
     return token
     
 def verify_access_token(token, aud: str = "tasks") -> dict:
     try:
-        print(f"Verifying token: {token}")
-        print(f"Using audience: {aud}, issuer: {ISS}")
-        print(f"Secret key: {SECRET_KEY}")
-        print(f"Algorithm: {ALGORITHM}")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], audience=aud, issuer=ISS ) #options = {"verify_exp": True}, audience=aud, issuer=ISS
         if payload.get("exp") < datetime.now(timezone.utc).timestamp():
             raise jwt.JWTError("Token has expired")
         return payload.get("sub", None)
     except jwt.JWTError as e:
-        print(f"Token verification error: {e}")
         return None
