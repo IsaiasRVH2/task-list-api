@@ -5,12 +5,15 @@ from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
 from app.crud.user import get_user
 
-async def create_task(task_create: TaskCreate, session: AsyncSession):
+async def create_task(user_id: int, task_create: TaskCreate, session: AsyncSession):
     task = Task(**task_create.model_dump())
-    user = await get_user(task_create.user_id, session)
+    if user_id is None:
+        return {"error": "User ID is required to create a task."}
+    user = await get_user(user_id, session)
     if not user or not user.is_active:
         print("Error: User not found.")
         return None
+    task.user_id = user_id
     session.add(task)
     await session.commit()
     await session.refresh(task)
@@ -26,8 +29,8 @@ async def get_tasks_by_user(user_id: int, session: AsyncSession):
     tasks = result.scalars().all()
     return tasks
 
-async def update_task(id: int, task_update: TaskUpdate, session: AsyncSession):
-    result = await session.execute(select(Task).filter(Task.id == id))
+async def update_task(user_id: int, task_id: int, task_update: TaskUpdate, session: AsyncSession):
+    result = await session.execute(select(Task).filter(Task.id == task_id, Task.user_id == user_id))
     task = result.scalars().first()
     if not task:
         return None
@@ -36,8 +39,8 @@ async def update_task(id: int, task_update: TaskUpdate, session: AsyncSession):
     await session.commit()
     return task
 
-async def delete_task(id: int, session: AsyncSession):
-    result = await session.execute(select(Task).filter(Task.id == id))
+async def delete_task(user_id: int, task_id: int, session: AsyncSession):
+    result = await session.execute(select(Task).filter(Task.id == task_id, Task.user_id == user_id))
     task = result.scalars().first()
     if task is None:
         return None

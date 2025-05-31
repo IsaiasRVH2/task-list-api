@@ -7,7 +7,6 @@ class TaskCreate(BaseModel):
     is_done: bool = False
     created_at: datetime
     due_date: Optional[datetime] = None
-    user_id: int
     
 class TaskInDB(TaskCreate):
     id: int
@@ -18,6 +17,7 @@ class TaskUpdate(BaseModel):
     due_date: Optional[datetime] = None
     
 class TaskResponse(BaseModel):
+    id: int
     content: str
     is_done: bool
     created_at: datetime
