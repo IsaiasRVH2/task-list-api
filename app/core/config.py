@@ -12,3 +12,7 @@ DB_PASSWORD = get_env_variable("DB_PASSWORD")
 DB_HOST = get_env_variable("DB_HOST")
 DB_PORT = get_env_variable("DB_PORT", "5432")
 DB_NAME = get_env_variable("DB_NAME")
+
+SECRET_KEY = get_env_variable("SECRET_KEY")
+ALGORITHM = get_env_variable("ALGORITHM")
+ISS = get_env_variable("ISS", "myapp")
