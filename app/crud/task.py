@@ -4,15 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
 from app.crud.user import get_user
+import app.exceptions as exceptions
 
 async def create_task(user_id: int, task_create: TaskCreate, session: AsyncSession):
     task = Task(**task_create.model_dump())
-    if user_id is None:
-        return {"error": "User ID is required to create a task."}
     user = await get_user(user_id, session)
     if not user or not user.is_active:
-        print("Error: User not found.")
-        return None
+        raise exceptions.bad_request(message="Invalid or inactive user.")
     task.user_id = user_id
     session.add(task)
     await session.commit()
@@ -33,8 +31,11 @@ async def update_task(user_id: int, task_id: int, task_update: TaskUpdate, sessi
     result = await session.execute(select(Task).filter(Task.id == task_id, Task.user_id == user_id))
     task = result.scalars().first()
     if not task:
-        return None
-    for field, value in task_update.model_dump(exclude_unset=True).items():
+        raise exceptions.not_found(message="Task not found.")
+    updates = task_update.model_dump(exclude_unset=True)
+    if not updates:
+        raise exceptions.bad_request(message="No fields to update.")
+    for field, value in updates.items():
         setattr(task, field, value)
     await session.commit()
     return task
@@ -43,7 +44,7 @@ async def delete_task(user_id: int, task_id: int, session: AsyncSession):
     result = await session.execute(select(Task).filter(Task.id == task_id, Task.user_id == user_id))
     task = result.scalars().first()
     if task is None:
-        return None
+        raise exceptions.not_found(message="Task not found.")
     session.delete(task)
     await session.commit()
-    return {"message": "Task deleted successfully."}
+    return {"message": "Task deleted successfully.", "task_id": task_id}
