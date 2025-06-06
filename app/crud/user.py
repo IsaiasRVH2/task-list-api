@@ -9,10 +9,10 @@ import app.exceptions as exceptions
 
 async def create_user(user_create: UserCreate, session: AsyncSession):
         if await check_user_email_exists(user_create.email, session):
-            raise exceptions.bad_request("User with this email already exists.")
+            raise exceptions.unprocessable_entity("User with this email already exists.")
             
         if await check_user_username_exists(user_create.username, session):
-            raise exceptions.bad_request("User with this username already exists.")
+            raise exceptions.unprocessable_entity("User with this username already exists.")
         
         user = User(
             username=user_create.username,
@@ -46,7 +46,7 @@ async def update_user(id: int, user_update: UserUpdate, session: AsyncSession):
         )
         existing_user = existing_user.scalars().first()
         if existing_user and existing_user.id != id:
-            raise exceptions.bad_request("User with this username already exists.")
+            raise exceptions.unprocessable_entity("User with this username already exists.")
     result = await session.execute(select(User).filter(User.id == id, User.is_active == True))
     user = result.scalars().first()
     if not user:

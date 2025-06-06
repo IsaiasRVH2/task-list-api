@@ -10,7 +10,7 @@ async def create_task(user_id: int, task_create: TaskCreate, session: AsyncSessi
     task = Task(**task_create.model_dump())
     user = await get_user(user_id, session)
     if not user or not user.is_active:
-        raise exceptions.bad_request(message="Invalid or inactive user.")
+        raise exceptions.unprocessable_entity(message="Invalid or inactive user.")
     task.user_id = user_id
     session.add(task)
     await session.commit()

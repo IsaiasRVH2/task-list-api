@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
@@ -11,7 +11,7 @@ import app.exceptions as exceptions
 
 router = APIRouter()
 
-@router.post("/tasks/", response_model=TaskResponse)
+@router.post("/tasks/", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
 async def create_task_endpoint(task_create: TaskCreate, session: AsyncSession = Depends(get_session), user: User = Depends(get_current_user)):
     task = await create_task(user.id, task_create, session)
     if not task:

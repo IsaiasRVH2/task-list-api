@@ -20,11 +20,11 @@ async def authenticate_user(email_username: str, password: str, session: AsyncSe
         raise exceptions.unauthorized("User authentication failed.")
     return user
 
-def generate_token(user: User, aud: str):
-    return create_access_token(data={"sub": user.id, "aud":aud}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+def generate_token(user: User):
+    return create_access_token(data={"sub": user.id}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
 
-async def get_current_user(aud: str, token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_session)):
-    user_id = int(verify_access_token(token, aud))
+async def get_current_user(token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_session)):
+    user_id = int(verify_access_token(token))
     if user_id is None:
         raise exceptions.unauthorized(message="User authentication failed.")
     user = await get_user(user_id, session)

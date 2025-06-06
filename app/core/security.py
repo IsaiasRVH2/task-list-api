@@ -17,8 +17,7 @@ def verify_password(plain_password: str, hashed_password: str):
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=60)) -> str:
     payload ={
         "iss": ISS,
-        "sub": str(data.get("sub", "")),  # Ensure sub is a string
-        "aud": data.get("aud"),
+        "sub": str(data.get("sub", "")),
         "iat": datetime.now(timezone.utc), 
         "exp":datetime.now(timezone.utc) + expires_delta
         }
@@ -26,9 +25,9 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return token
     
-def verify_access_token(token, aud: str = "tasks") -> dict:
+def verify_access_token(token) -> dict:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], audience=aud, issuer=ISS ) #options = {"verify_exp": True}, audience=aud, issuer=ISS
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], issuer=ISS )
         return payload.get("sub", None)
     except jwt.ExpiredSignatureError:
         raise exceptions.unauthorized("Token has expired.")

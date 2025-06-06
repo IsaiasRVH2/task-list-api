@@ -16,7 +16,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), session=Depend
     email_username = form_data.username
     password = form_data.password
     user =  await authenticate_user(email_username, password, session)
-    access_token = create_access_token(data={"sub": user.id, "aud": "tasks"})
+    access_token = create_access_token(data={"sub": user.id})
     return Token(access_token=access_token, token_type="bearer")
 
 @router.get("/user", response_model=UserResponse)

@@ -29,3 +29,9 @@ def bad_request(message: str = "Bad Request") -> HTTPException:
     Raises a 400 Bad Request HTTP exception with the provided message.
     """
     return HTTPException(status_code=400, detail=message)
+
+def unprocessable_entity(message: str = "Unprocessable Entity") -> HTTPException:
+    """
+    Raises a 422 Unprocessable Entity HTTP exception with the provided message.
+    """
+    return HTTPException(status_code=422, detail=message)
